@@ -1,0 +1,12 @@
+port: 1337
+output_filename: forza_data.csv
+format: csv
+append: False
+packet_format: dash
+parameter_list:
+  - time
+  - current_engine_rpm
+  - speed
+  - accel
+  - brake
+  - lap_no

@@ -100,7 +100,7 @@ def dump_stream(port, output_filename, format='tsv',
     if append:
         open_mode = 'a'
 
-    with open(output_filename, open_mode, buffering=1) as outfile:
+    with open(output_filename, open_mode, buffering=1) as outfile, socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as server_socket:
         if format == 'csv':
             csv_writer = csv.writer(outfile)
             if not append:
@@ -110,8 +110,7 @@ def dump_stream(port, output_filename, format='tsv',
         if format == 'tsv' and not append:
             outfile.write('\t'.join(params))
             outfile.write('\n')
-                
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
         server_socket.bind(('', port))
 
         logging.info('listening on port {}'.format(port))

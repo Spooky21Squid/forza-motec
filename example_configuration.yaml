@@ -3,8 +3,8 @@ output_filename: forza_data.csv
 format: csv
 append: False
 packet_format: dash
+motec: True
 parameter_list:
-  - time
   - current_engine_rpm
   - speed
   - accel

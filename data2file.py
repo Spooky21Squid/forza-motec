@@ -27,7 +27,7 @@ def to_str(value):
     return('{}'.format(value))
 
 def dump_stream(port, output_filename, format='tsv',
-                append=False, packet_format='dash', config_file = None):
+                append=False, packet_format='dash', config_file = None, motec = False):
     '''
     Opens the given output filename, listens to UDP packets on the given port
     and writes data to the file.
@@ -73,6 +73,9 @@ def dump_stream(port, output_filename, format='tsv',
 
         if 'packet_format' in config:
             packet_format = config['packet_format']
+        
+        if 'motec' in config:
+            motec = config['motec']
 
     params = ForzaDataPacket.get_props(packet_format = packet_format)
     if config_file and 'parameter_list' in config:
@@ -81,13 +84,13 @@ def dump_stream(port, output_filename, format='tsv',
     # Motec needs a time field, so this normalises the time of a session even when there are game pauses. motec_time_modifier begins
     # as the time of arrival of the first packet, and increases by the amount of time is_race_on remains false. The time field of the
     # motec csv file then equals the time of receival of a packet, minus the modifier.
-    log_motec_time = False
     motec_time_modifier = None  # Set when the first packet arrives
     pause_start_time = None  # Marks the time when a packet with is_race_on is False is received
     pause_end_time = None  # Marks the time when a packet with is_race_on is True is received
     was_paused = False
-    if 'time' in params:
-        log_motec_time = True
+
+    if motec:
+        params.insert(0, 'time')
 
     log_wall_clock = False
     if 'wall_clock' in params:
@@ -123,13 +126,13 @@ def dump_stream(port, output_filename, format='tsv',
             if log_wall_clock:
                 fdp.wall_clock = dt.datetime.now()
 
-            if log_motec_time:
+            if motec:
                 if not first_packet_received:
                     motec_time_modifier = time_of_arrival
                     first_packet_received = True
 
             if fdp.is_race_on:
-                if log_motec_time:
+                if motec:
                     if was_paused:
                         pause_end_time = dt.datetime.now()
                         motec_time_modifier += (pause_end_time - pause_start_time)  # Moves time modifier forward by the duration of the pause
@@ -148,7 +151,7 @@ def dump_stream(port, output_filename, format='tsv',
                 if n_packets % 60 == 0:
                     logging.info('{}: logged {} packets'.format(dt.datetime.now(), n_packets))
             else:
-                if log_motec_time and not was_paused:
+                if motec and not was_paused:
                     was_paused = True
                     pause_start_time = dt.datetime.now()
                 if n_packets > 0:
@@ -180,6 +183,9 @@ def main():
     cli_parser.add_argument('-c', '--config_file', type=str,
                             help='path to the YAML configuration file')
 
+    cli_parser.add_argument('-m', '--motec', action='store_true',
+                            default=False, help='if set, adds motec-specific metadata and fields to the file')
+
     cli_parser.add_argument('port', type=int,
                             help='port number to listen on')
 
@@ -192,7 +198,7 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     dump_stream(args.port, args.output_filename, args.format, args.append,
-                args.packet_format, args.config_file)
+                args.packet_format, args.config_file, args.motec)
 
     return()
 

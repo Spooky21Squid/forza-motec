@@ -19,6 +19,8 @@ The configuration file can override all the command line options. They are as fo
   * Example: `append: False`
 * `packet_format`: The format of the data packets. Either `sled`, the older format, or `dash`, the newer format.
   * Example: `packet_format: dash`
+* `motec`: Whether additional motec-specific metadata and fields should be added to the file. The value should be either `True` or `False`, respectively.
+  * Example: `motec: True`
 
 The example configuration file sets all of these options and can be used as a starting point for creating your own configuration file.
 

@@ -102,7 +102,7 @@ def dump_stream(port, output_filename, format='tsv',
 
     with open(output_filename, open_mode, buffering=1) as outfile, socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as server_socket:
         if format == 'csv':
-            csv_writer = csv.writer(outfile)
+            csv_writer = csv.writer(outfile, lineterminator = "\r")
             if not append:
                 csv_writer.writerow(params)
 
